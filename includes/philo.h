@@ -1,14 +1,19 @@
 #ifndef PHILO_H
 # define PHILO_H
 
+# include <stdbool.h>
 # include <pthread.h>
 # include "libft.h"
+
+# define RESET    "\033[0m"
+# define RED      "\033[31m"    /* Red */
+# define GREEN    "\033[32m"    /* Green */
+
+# define PHILO_MAX_COUNT 300
 
 typedef pthread_t		t_id;
 typedef pthread_mutex_t	t_mutex;
 typedef struct timeval	t_timeval;
-
-# define PHILO_MAX_COUNT 300
 
 typedef struct s_mutexes
 {
@@ -24,7 +29,7 @@ typedef struct s_times
 	size_t	die;
 	size_t	eat;
 	size_t	sleep;
-	size_t	last_eat;
+	size_t	last_meal;
 	size_t	born_time;
 }	t_times;
 
@@ -34,17 +39,20 @@ typedef struct s_philo
 	t_times		times;
 	t_mutexes	mutexes;
 	int			must_eat;
+	t_id		thread_id;
 	int			meals_eaten;
 	int			philo_count;
+	bool		*isAnyPhiloDead;
 }	t_philo;
 
 typedef struct s_engine
 {
-	t_mutex	write_lock;
-	t_mutex	meal_lock;
-	t_mutex	dead_lock;
-	t_philo	*philos;
 	t_mutex	*forks;
+	t_philo	*philos;
+	t_mutex	dead_lock;
+	t_mutex	meal_lock;
+	t_mutex	write_lock;
+	bool	isAnyPhiloDead;
 }	t_engine;
 
 #endif   /* PHILO_H */

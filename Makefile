@@ -12,7 +12,7 @@ WHITE    		= "\033[37m"    # White
 # Compiler
 NAME			= philo
 CC				= cc
-CFLAGS			= -Wall -Wextra -Werror -g -fsanitize=address
+CFLAGS			= -Wall -Wextra -Werror -g -fsanitize=thread
 MKDIR			= mkdir -p
 RM				= rm -rf
 LINKER  	    = -lpthread
@@ -27,6 +27,7 @@ SRCS_DIR		= srcs/
 SRC_FILES		= main.c \
 				  init.c \
 				  utils.c \
+				  simulation.c \
 
 # Objects
 OBJS_DIR		= objs/

@@ -12,16 +12,17 @@ void	init_philos(t_engine *en, t_philo *philos, t_mutex *forks, char **argv)
 		philos[i].times.die = ft_atoi(argv[2]);
 		philos[i].times.eat = ft_atoi(argv[3]);
 		philos[i].times.sleep = ft_atoi(argv[4]);
-		philos[i].times.last_eat = LONG_MAX;
-		philos[i].times.born_time = LONG_MAX;
+		philos[i].times.last_meal = get_current_time();
+		philos[i].times.born_time = get_current_time();
 		philos[i].must_eat = -1;
 		if (argv[5])
 			philos[i].must_eat = ft_atoi(argv[5]);
 		philos[i].meals_eaten = 0;
 		philos[i].philo_count = ft_atoi(argv[1]);
+		philos[i].isAnyPhiloDead = &en->isAnyPhiloDead;
 		philos[i].mutexes.left_fork = &forks[i];
 		if (i == 0)
-			philos[i].mutexes.right_fork = &forks[ft_atoi(argv[1] - 1)];
+			philos[i].mutexes.right_fork = &forks[philos[i].philo_count - 1];
 		else
 			philos[i].mutexes.right_fork = &forks[i - 1];
 		philos[i].mutexes.write_lock = &en->write_lock;
@@ -38,7 +39,7 @@ void	init_forks(t_engine* engine, t_mutex *forks, int count)
 	while (++i < count)
 	{
 		if (pthread_mutex_init(&forks[i], NULL) != 0)
-			destroy_mutexes(engine, "[Mutex Init ERROR]\n", i, 1);
+			destroy_all(engine, "[Mutex Init ERROR]\n", i, 1);
 	}
 }
 
@@ -46,17 +47,9 @@ void	init_engine(t_engine *engine, t_philo *philos, t_mutex *forks)
 {
 	engine->forks = forks;
 	engine->philos = philos;
-	if (pthread_mutex_init(&engine->write_lock, NULL) != 0)
-		error_message("[Mutex Init ERROR]\n", 1);
-	if (pthread_mutex_init(&engine->meal_lock, NULL) != 0)
-	{
-		pthread_mutex_destroy(&engine->write_lock);
-		error_message("[Mutex Init ERROR]\n", 1);
-	}
-	if (pthread_mutex_init(&engine->dead_lock, NULL) != 0)
-	{
-		pthread_mutex_destroy(&engine->write_lock);
-		pthread_mutex_destroy(&engine->meal_lock);
-		error_message("[Mutex Init ERROR]\n", 1);
-	}
+	engine->isAnyPhiloDead = false;
+	if (pthread_mutex_init(&engine->write_lock, NULL) != 0 ||
+		pthread_mutex_init(&engine->meal_lock, NULL) != 0 ||
+		pthread_mutex_init(&engine->dead_lock, NULL) != 0)
+		destroy_all(engine, "[Mutex Init ERROR]\n", -1, 1);
 }
