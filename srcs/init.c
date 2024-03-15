@@ -1,4 +1,15 @@
-#include "init.h"
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   init.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: dapetros <marvin@42.fr>                    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/03/15 16:57:09 by dapetros          #+#    #+#             */
+/*   Updated: 2024/03/15 16:58:37 by dapetros         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "utils.h"
 
 void	init_philos(t_engine *en, t_philo *philos, t_mutex *forks, char **argv)
@@ -19,7 +30,6 @@ void	init_philos(t_engine *en, t_philo *philos, t_mutex *forks, char **argv)
 			philos[i].must_eat = ft_atoi(argv[5]);
 		philos[i].meals_eaten = 0;
 		philos[i].philo_count = ft_atoi(argv[1]);
-		philos[i].isAnyPhiloDead = &en->isAnyPhiloDead;
 		philos[i].mutexes.left_fork = &forks[i];
 		if (i == 0)
 			philos[i].mutexes.right_fork = &forks[philos[i].philo_count - 1];
@@ -27,11 +37,10 @@ void	init_philos(t_engine *en, t_philo *philos, t_mutex *forks, char **argv)
 			philos[i].mutexes.right_fork = &forks[i - 1];
 		philos[i].mutexes.write_lock = &en->write_lock;
 		philos[i].mutexes.meal_lock = &en->meal_lock;
-		philos[i].mutexes.dead_lock = &en->dead_lock;
 	}
 }
 
-void	init_forks(t_engine* engine, t_mutex *forks, int count)
+void	init_forks(t_engine *engine, t_mutex *forks, int count)
 {
 	int	i;
 
@@ -47,9 +56,7 @@ void	init_engine(t_engine *engine, t_philo *philos, t_mutex *forks)
 {
 	engine->forks = forks;
 	engine->philos = philos;
-	engine->isAnyPhiloDead = false;
-	if (pthread_mutex_init(&engine->write_lock, NULL) != 0 ||
-		pthread_mutex_init(&engine->meal_lock, NULL) != 0 ||
-		pthread_mutex_init(&engine->dead_lock, NULL) != 0)
+	if (pthread_mutex_init(&engine->write_lock, NULL) != 0
+		|| pthread_mutex_init(&engine->meal_lock, NULL) != 0)
 		destroy_all(engine, "[Mutex Init ERROR]\n", -1, 1);
 }

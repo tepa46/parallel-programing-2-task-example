@@ -12,7 +12,7 @@ WHITE    		= "\033[37m"    # White
 # Compiler
 NAME			= philo
 CC				= cc
-CFLAGS			= -Wall -Wextra -Werror -g -fsanitize=thread
+CFLAGS			= -Wall -Wextra -Werror
 MKDIR			= mkdir -p
 RM				= rm -rf
 LINKER  	    = -lpthread
@@ -27,6 +27,7 @@ SRCS_DIR		= srcs/
 SRC_FILES		= main.c \
 				  init.c \
 				  utils.c \
+				  str_utils.c \
 				  simulation.c \
 
 # Objects
@@ -34,29 +35,16 @@ OBJS_DIR		= objs/
 OBJ_FILES		= $(SRC_FILES:.c=.o)
 OBJS			= $(addprefix $(OBJS_DIR), $(OBJ_FILES))
 
-#Libft
-LIBFT_DIR		= libft/
-INCLUDES_FLAG 	+= -I$(LIBFT_DIR)
-INCLUDES		+= $(LIBFT_DIR)libft.h
-LIBFT_FILES		= ft_atoi.c \
-				  ft_strlen.c \
-
-LIBFT_OBJ_FILES	= $(LIBFT_FILES:.c=.o)
-LIBFT_OBJS		= $(addprefix $(OBJS_DIR), $(LIBFT_OBJ_FILES))
-
 
 all : $(OBJS_DIR) $(NAME)
 
 $(OBJS_DIR) :
 	@$(MKDIR) $(OBJS_DIR)
 
-$(NAME) : $(LIBFT_OBJS) $(OBJS) Makefile
+$(NAME) : $(OBJS) Makefile
 	@echo $(GREEN) " - Compiling $(NAME)..." $(RESET)
-	@$(CC) $(CFLAGS) $(LIBFT_OBJS) $(OBJS) $(LINKER) -o $(NAME)
+	@$(CC) $(CFLAGS) $(OBJS) $(LINKER) -o $(NAME)
 	@echo $(YELLOW) " - Compiling FINISHED" $(RESET)
-
-$(OBJS_DIR)%.o : $(LIBFT_DIR)%.c $(INCLUDES)
-	@$(CC) $(CFLAGS) $(INCLUDES_FLAG) -c $< -o $@
 
 $(OBJS_DIR)%.o : $(SRCS_DIR)%.c $(INCLUDES)
 	@$(CC) $(CFLAGS) $(INCLUDES_FLAG) -c $< -o $@	
