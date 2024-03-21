@@ -12,7 +12,7 @@ WHITE    		= "\033[37m"    # White
 # Compiler
 NAME			= philo_bonus
 CC				= cc
-CFLAGS			= -Wall -Wextra -Werror -g3
+CFLAGS			= -Wall -Wextra -Werror
 MKDIR			= mkdir -p
 RM				= rm -rf
 LINKER  	    = -lpthread

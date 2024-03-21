@@ -19,15 +19,15 @@ void	*die_checker(void *ptr)
 	philo = (t_philo *)ptr;
 	while (true)
 	{
+		sem_wait(philo->sems->die_sem);
 		if (get_current_time() - philo->times.last_meal > philo->times.die)
 		{
 			print_action(philo, RED"died"RESET);
-			sem_wait(philo->sems.write_sem);
-			sem_close(philo->sems.fork_sem);
-			sem_close(philo->sems.meal_sem);
-			sem_close(philo->sems.write_sem);
+			sem_wait(philo->sems->write_sem);
+			sem_post(philo->sems->meal_sem);
 			exit(EXIT_SUCCESS);
 		}
+		sem_post(philo->sems->die_sem);
 	}
 	return (NULL);
 }
@@ -41,54 +41,44 @@ void	*meal_checker(void *ptr)
 	engine = (t_engine *)ptr;
 	while (true)
 	{
-		sem_wait(engine->meal_sem);
+		sem_wait(engine->sems->meal_sem);
 		++finished;
-		//printf("AAAAAAAAAA %d", finished);
-		if (finished == engine->philos[0].must_eat)
-		{
-			//sem_wait(engine->write_sem);
-			destroy_all(engine, NULL, true, 0);
-		}
+		if (finished >= engine->philo_count)
+			destroy_all(engine, NULL, true, EXIT_SUCCESS);
 	}
 	return (NULL);
 }
 
 void	philo_routine(t_philo *philo)
 {
-	sem_wait(philo->sems.fork_sem);
+	sem_wait(philo->sems->fork_sem);
 	print_action(philo, "has taken a fork");
-	sem_wait(philo->sems.fork_sem);
+	sem_wait(philo->sems->fork_sem);
 	print_action(philo, "has taken a fork");
 	print_action(philo, "is eating");
+	sem_wait(philo->sems->die_sem);
 	philo->times.last_meal = get_current_time();
 	philo->meals_eaten += 1;
-	if (philo->meals_eaten == philo->must_eat)
-	{
-		sem_post(philo->sems.meal_sem);
-	}
+	sem_post(philo->sems->die_sem);
+	if (philo->meals_eaten >= philo->must_eat)
+		sem_post(philo->sems->meal_sem);
 	ft_usleep(philo->times.eat);
-	sem_post(philo->sems.fork_sem);
-	sem_post(philo->sems.fork_sem);
+	sem_post(philo->sems->fork_sem);
+	sem_post(philo->sems->fork_sem);
 	print_action(philo, "is sleeping");
 	ft_usleep(philo->times.sleep);
 	print_action(philo, "is thinking");
 }
 
-void	start_simulation(t_philo *philo)
+void	start_simulation(t_engine *engine, int index)
 {
 	t_id	die_checker_id;
+	t_philo	*philo;
 
+	philo = engine->philos[index];
 	if (pthread_create(&die_checker_id, NULL, die_checker, philo) != 0
 		|| pthread_detach(die_checker_id) != 0)
-	{
-		sem_close(philo->sems.fork_sem);
-		sem_close(philo->sems.meal_sem);
-		sem_close(philo->sems.write_sem);
-		error_message("[Thread Error]\n", 1);
-	}
-	// philo->sems.meal_sem = sem_open(MEAL_SEM_NAME, 0);
-	// philo->sems.fork_sem = sem_open(FORK_SEM_NAME, 0);
-	// philo->sems.write_sem = sem_open(WRITE_SEM_NAME, 0);
+		destroy_all(engine, "[Thread ERROR]\n", false, EXIT_FAILURE);
 	philo->times.born_time = get_current_time();
 	philo->times.last_meal = get_current_time();
 	while (true)
@@ -98,13 +88,13 @@ void	start_simulation(t_philo *philo)
 void	launcher(t_engine *engine, int count)
 {
 	t_id	meal_checker_id;
-	t_philo	*philos;
+	t_philo	**philos;
 	pid_t	id;
 	int		i;
 
 	i = -1;
 	philos = engine->philos;
-	if (philos[0].must_eat > 0)
+	if (philos[0]->must_eat > 0)
 	{
 		if (pthread_create(&meal_checker_id, NULL, meal_checker, engine) != 0)
 			destroy_all(engine, "[Thread Open ERROR]\n", true, 1);
@@ -118,7 +108,7 @@ void	launcher(t_engine *engine, int count)
 		if (id == -1)
 			destroy_all(engine, "[Fork ERROR]\n", true, 1);
 		if (id == 0)
-			start_simulation(&philos[i]);
+			start_simulation(engine, i);
 	}
 	waitpid(-1, NULL, 0);
 }

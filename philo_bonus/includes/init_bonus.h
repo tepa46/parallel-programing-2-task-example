@@ -15,7 +15,8 @@
 
 # include "philo_bonus.h"
 
-void	init_philos(t_engine *en, t_philo *philos, char **argv, int count);
-void	init_engine(t_engine *en, t_philo *philos, pid_t *proc_ids, int count);
+void		init_philos(t_engine *engine, char **argv, int count);
+void		init_sems(t_engine *engine, t_sems *sems, int count);
+t_engine	*init_engine(int count);
 
 #endif   /* INIT_BONUS_H */

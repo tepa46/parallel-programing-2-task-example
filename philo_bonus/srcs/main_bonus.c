@@ -28,7 +28,7 @@ void	check_args(int argc, char **argv)
 		num = ft_atoi(argv[i]);
 		if (i == 1 && (num < 1 || num > PHILO_MAX_COUNT))
 			error_message("[Argument ERROR]\n", 1);
-		else if (i == 5 && (num < 0 || num > INT_MAX))
+		else if (i == 5 && (num < 1 || num > INT_MAX))
 			error_message("[Argument ERROR]\n", 1);
 		else if (i != 1 && i != 5 && (num < 1 || num > INT_MAX))
 			error_message("[Argument ERROR]\n", 1);
@@ -37,14 +37,12 @@ void	check_args(int argc, char **argv)
 
 int	main(int argc, char **argv)
 {
-	t_philo		philos[PHILO_MAX_COUNT];
-	pid_t		proc_ids[PHILO_MAX_COUNT];
-	t_engine	engine;
+	t_engine	*engine;
 
 	check_args(argc, argv);
-	init_engine(&engine, philos, proc_ids, ft_atoi(argv[1]));
-	init_philos(&engine, philos, argv, engine.philo_count);
-	launcher(&engine, engine.philo_count);
-	destroy_all(&engine, NULL, true, 0);
+	engine = init_engine(ft_atoi(argv[1]));
+	init_philos(engine, argv, engine->philo_count);
+	launcher(engine, engine->philo_count);
+	destroy_all(engine, NULL, true, EXIT_SUCCESS);
 	return (0);
 }

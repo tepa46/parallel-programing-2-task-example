@@ -24,18 +24,27 @@ void	destroy_all(t_engine *engine, char *str, bool isParentProc, int signal)
 	int	i;
 
 	i = -1;
-	if (engine->fork_sem != SEM_FAILED)
-		sem_close(engine->fork_sem);
-	if (engine->meal_sem != SEM_FAILED)
-		sem_close(engine->meal_sem);
-	if (engine->write_sem != SEM_FAILED)
-		sem_close(engine->write_sem);
 	if (isParentProc)
 	{
 		while (++i < engine->philo_count)
 			if (engine->proc_ids[i] != -1)
 				kill(engine->proc_ids[i], SIGKILL);
 	}
+	if (engine->sems->die_sem != SEM_FAILED)
+		sem_close(engine->sems->die_sem);
+	if (engine->sems->fork_sem != SEM_FAILED)
+		sem_close(engine->sems->fork_sem);
+	if (engine->sems->meal_sem != SEM_FAILED)
+		sem_close(engine->sems->meal_sem);
+	if (engine->sems->write_sem != SEM_FAILED)
+		sem_close(engine->sems->write_sem);
+	i = -1;
+	while (++i < engine->philo_count)
+		free(engine->philos[i]);
+	free(engine->sems);
+	free(engine->philos);
+	free(engine->proc_ids);
+	free(engine);
 	error_message(str, signal);
 }
 
@@ -43,10 +52,10 @@ void	print_action(t_philo *philo, char *action)
 {
 	size_t	time;
 
-	sem_wait(philo->sems.write_sem);
+	sem_wait(philo->sems->write_sem);
 	time = get_current_time() - philo->times.born_time;
 	printf(GREEN"[%ld]"RESET" %d %s\n", time, philo->id, action);
-	sem_post(philo->sems.write_sem);
+	sem_post(philo->sems->write_sem);
 }
 
 size_t	get_current_time(void)
@@ -64,5 +73,5 @@ void	ft_usleep(size_t mls)
 
 	start = get_current_time();
 	while (get_current_time() - start < mls)
-		usleep(500);
+		usleep(100);
 }
