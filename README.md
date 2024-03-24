@@ -44,7 +44,7 @@
 For detailed information, refer to the [**subject of this project**](README_files/philo_subject.pdf).
 
 	🚀 TLDR: This project is an introduction to the basics of multithreading and multiprocessing.
-    How to work on the same memory space, and learn about mutexes, semaphores, and shared memory.
+    	 Work on the same memory space, learn about mutexes, semaphores, and shared memory.
 
 > [!NOTE]  
 > Because of 42 School norm requirements:
