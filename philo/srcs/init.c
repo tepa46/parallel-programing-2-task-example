@@ -15,6 +15,7 @@
 void	init_philos(t_engine *en, t_philo *philos, t_mutex *forks, char **argv)
 {
 	int	i;
+    bool finish = false;
 
 	i = -1;
 	while (++i < ft_atoi(argv[1]))
@@ -37,6 +38,7 @@ void	init_philos(t_engine *en, t_philo *philos, t_mutex *forks, char **argv)
 			philos[i].mutexes.right_fork = &forks[i - 1];
 		philos[i].mutexes.write_lock = &en->write_lock;
 		philos[i].mutexes.meal_lock = &en->meal_lock;
+        philos[i].finish = &finish;
 	}
 }
 

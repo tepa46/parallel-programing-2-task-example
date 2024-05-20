@@ -52,6 +52,7 @@ typedef struct s_philo
 	t_id		thread_id;
 	int			meals_eaten;
 	int			philo_count;
+    bool        *finish;
 }	t_philo;
 
 typedef struct s_engine
